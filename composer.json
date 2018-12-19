@@ -1,0 +1,49 @@
+{
+    "name": "wizhippo/site-menu-bundle",
+    "description": "Wizhippo Site Menu bundle is based on Netgen Site Bundle and is an eZ Platform bundle that implements common menu features for websites",
+    "license": "GPL-2.0-only",
+    "type": "ezplatform-bundle",
+    "keywords": [
+        "ezpublish",
+        "ezplatform",
+        "site-menu-bundle",
+        "wizhippo"
+    ],
+    "homepage": "https://github.com/wizhippo/site-menu-bundle",
+    "authors": [
+        {
+            "name": "Wizhippo",
+            "homepage": "https://github.com/wizhippo"
+        }
+    ],
+    "require": {
+        "php": "^7.1",
+        "ezsystems/ezpublish-kernel": "^7.3",
+        "friendsofsymfony/http-cache-bundle": "^1.3",
+        "knplabs/knp-menu-bundle": "^2.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.4",
+        "friendsofphp/php-cs-fixer": "^2.13"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wizhippo\\Bundle\\SiteMenuBundle\\": "bundle/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Wizhippo\\Bundle\\SiteMenuBundle\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "@php vendor/bin/phpunit --colors=always",
+        "coverage": "@php -dzend_extension=xdebug.so vendor/bin/phpunit --colors=always",
+        "fix": "@php vendor/bin/php-cs-fixer fix"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}

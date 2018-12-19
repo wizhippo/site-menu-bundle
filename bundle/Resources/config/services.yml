@@ -1,0 +1,42 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    Wizhippo\Bundle\SiteMenuBundle\Controller\MenuController:
+        public: true
+        arguments:
+            - '@ezpublish.config.resolver'
+            - '@knp_menu.menu_provider'
+            - '@knp_menu.renderer_provider'
+            - '@fos_http_cache.handler.tag_handler'
+
+    Wizhippo\Bundle\SiteMenuBundle\EventListener\Menu\EsiFragmentEventListener:
+        arguments:
+            - '@request_stack'
+            - '%fragment.path%'
+
+    Wizhippo\Bundle\SiteMenuBundle\Menu\Factory\LocationFactory:
+        arguments:
+            - '@event_dispatcher'
+            - '@Wizhippo\Bundle\SiteMenuBundle\Menu\Factory\LocationFactory\FallbackExtension'
+            - !tagged wizhippo.menu.factory.location.extension
+
+    Wizhippo\Bundle\SiteMenuBundle\Menu\Factory\LocationFactory\FallbackExtension:
+        arguments:
+            - '@router'
+
+    Wizhippo\Bundle\SiteMenuBundle\Menu\RelationListMenuBuilder:
+        arguments:
+            - '@event_dispatcher'
+            - '@Wizhippo\Bundle\SiteMenuBundle\Menu\Factory\LocationFactory'
+            - '@ezpublish.api.service.location'
+            - '@ezpublish.api.service.content'
+            - '@ezpublish.config.resolver'
+            - '@?logger'
+
+    Wizhippo\Bundle\SiteMenuBundle\Menu\Voter\LocationPathVoter:
+        arguments:
+            - '@ezpublish.api.service.location'
+            - '@request_stack'
