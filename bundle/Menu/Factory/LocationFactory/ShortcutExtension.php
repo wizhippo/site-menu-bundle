@@ -67,22 +67,14 @@ class ShortcutExtension implements ExtensionInterface
         return $contentType->identifier === $this->contentTypeIdentifier;
     }
 
-    public function buildItem(ItemInterface $item, Location $location): void
+    public function buildOptions(array $options): array
     {
+        /** @var \eZ\Publish\API\Repository\Values\Content\Location $location */
+        $location = $options['ezlocation'];
         $content = $location->getContent();
 
-        $this->buildItemFromContent($item, $content);
-
-        if ($this->targetFieldIdentifier && $content->getField($this->targetFieldIdentifier)->value->bool) {
-            $item->setLinkAttribute('target', '_blank')
-                ->setLinkAttribute('rel', 'noopener noreferrer');
-        }
-    }
-
-    protected function buildItemFromContent(ItemInterface $item, Content $content): void
-    {
         if (empty($content->getField($this->urlFieldIdentifier)->value->link)) {
-            return;
+            return $options;
         }
 
         $urlValue = $content->getField($this->urlFieldIdentifier)->value;
@@ -96,11 +88,18 @@ class ShortcutExtension implements ExtensionInterface
             }
         }
 
-        $item->setUri($uri);
+        $options['uri'] = $this->urlGenerator->generate($location);
 
         if (!empty($urlValue->text)) {
-            $item->setLinkAttribute('title', $urlValue->text);
-            $item->setLabel($urlValue->text);
+            $options['linkAttributes']['title'] = $urlValue->text;
+            $options['label'] = $urlValue->text;
         }
+
+        return $options;
+    }
+
+    public function buildItem(ItemInterface $item, array $options): void
+    {
+        $item->setUri($options['uri']);
     }
 }

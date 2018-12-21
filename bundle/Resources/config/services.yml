@@ -17,26 +17,28 @@ services:
             - '@request_stack'
             - '%fragment.path%'
 
-    Wizhippo\Bundle\SiteMenuBundle\Menu\Factory\LocationFactory:
-        arguments:
-            - '@event_dispatcher'
-            - '@Wizhippo\Bundle\SiteMenuBundle\Menu\Factory\LocationFactory\FallbackExtension'
-            - !tagged wizhippo.menu.factory.location.extension
-
     Wizhippo\Bundle\SiteMenuBundle\Menu\Factory\LocationFactory\FallbackExtension:
         arguments:
             - '@router'
 
+    Wizhippo\Bundle\SiteMenuBundle\Menu\Integration\Ez\LocationExtension:
+        arguments:
+            - '@event_dispatcher'
+            - '@Wizhippo\Bundle\SiteMenuBundle\Menu\Factory\LocationFactory\FallbackExtension'
+            - !tagged wizhippo.menu.factory.location.extension
+        tags:
+            - { name: knp_menu.factory_extension }
+
     Wizhippo\Bundle\SiteMenuBundle\Menu\RelationListMenuBuilder:
         arguments:
             - '@event_dispatcher'
-            - '@Wizhippo\Bundle\SiteMenuBundle\Menu\Factory\LocationFactory'
-            - '@ezpublish.api.service.location'
-            - '@ezpublish.api.service.content'
+            - '@knp_menu.factory'
+            - '@ezpublish.siteaccessaware.service.location'
+            - '@ezpublish.siteaccessaware.service.content'
             - '@ezpublish.config.resolver'
             - '@?logger'
 
     Wizhippo\Bundle\SiteMenuBundle\Menu\Voter\LocationPathVoter:
         arguments:
-            - '@ezpublish.api.service.location'
+            - '@ezpublish.siteaccessaware.service.location'
             - '@request_stack'

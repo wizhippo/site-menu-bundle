@@ -19,10 +19,19 @@ interface ExtensionInterface
     public function matches(Location $location): bool;
 
     /**
-     * Configures the item with the passed options.
+     * Builds the full option array used to configure the item.
      *
-     * @param \Knp\Menu\ItemInterface $item
-     * @param \eZ\Publish\API\Repository\Values\Content\Location $location
+     * @param array $options The options processed by the previous extensions
+     *
+     * @return array
      */
-    public function buildItem(ItemInterface $item, Location $location): void;
+    public function buildOptions(array $options);
+
+    /**
+     * Configures the item with the passed options
+     *
+     * @param ItemInterface $item
+     * @param array         $options
+     */
+    public function buildItem(ItemInterface $item, array $options);
 }

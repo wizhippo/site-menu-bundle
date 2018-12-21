@@ -2,18 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Wizhippo\Bundle\SiteMenuBundle\Menu\Factory;
+namespace Wizhippo\Bundle\SiteMenuBundle\Menu\Integration\Ez;
 
 use eZ\Publish\API\Repository\Values\Content\Location;
-use Knp\Menu\FactoryInterface;
+use Knp\Menu\Factory\ExtensionInterface as KnpExtensionInterface;
 use Knp\Menu\ItemInterface;
-use Knp\Menu\MenuItem;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Wizhippo\Bundle\SiteMenuBundle\Event\Menu\LocationMenuItemEvent;
 use Wizhippo\Bundle\SiteMenuBundle\Event\SiteMenuEvents;
+use Wizhippo\Bundle\SiteMenuBundle\Event\Menu\LocationMenuItemEvent;
 use Wizhippo\Bundle\SiteMenuBundle\Menu\Factory\LocationFactory\ExtensionInterface;
 
-class LocationFactory implements FactoryInterface
+/**
+ * Factory able to use the Ez Location to build the url
+ */
+class LocationExtension implements KnpExtensionInterface
 {
     /**
      * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
@@ -40,39 +42,42 @@ class LocationFactory implements FactoryInterface
         $this->extensions = $extensions;
     }
 
-    /**
-     * @param string $name
-     * @param array  $options
-     *
-     * @return \Knp\Menu\ItemInterface
-     */
-    public function createItem($name, array $options = []): ItemInterface
+    public function buildOptions(array $options): array
     {
-        $menuItem = (new MenuItem($name, $this))->setExtra('translation_domain', false);
-
         if (!isset($options['ezlocation']) || !$options['ezlocation'] instanceof Location) {
-            return $menuItem;
+            return $options;
+        }
+
+        /** @var \eZ\Publish\API\Repository\Values\Content\Location $location */
+        $location = $options['ezlocation'];
+        $options['extras']['ezlocation'] = $location;
+        $options['label'] = $location->getContent()->getName();
+
+        return $this->getExtension($location)
+            ->buildOptions($options);
+    }
+
+    public function buildItem(ItemInterface $item, array $options): ItemInterface
+    {
+        if (!isset($options['ezlocation']) || !$options['ezlocation'] instanceof Location) {
+            return $item;
         }
 
         /** @var \eZ\Publish\API\Repository\Values\Content\Location $location */
         $location = $options['ezlocation'];
 
-        /** @var \eZ\Publish\API\Repository\Values\Content\Content $content */
-        $content = $location->getContent();
+        $extension = $this->getExtension($location)
+            ->buildItem($item, $options);
 
-        $menuItem
-            ->setLabel($content->getName())
-            ->setExtra('ezlocation', $location);
+        if (!strlen($item->getName())) {
+            $item
+                ->setName(md5($options['uri'] ?? ''));
+        }
 
-        $extension = $this->getExtension($location);
-        $extension->buildItem($menuItem, $location);
-
-        $menuItem->setName(md5($menuItem->getUri() ?? ''));
-
-        $event = new LocationMenuItemEvent($menuItem, $menuItem->getExtra('ezlocation'));
+        $event = new LocationMenuItemEvent($item, $location);
         $this->eventDispatcher->dispatch(SiteMenuEvents::MENU_LOCATION_ITEM, $event);
 
-        return $menuItem;
+        return $item;
     }
 
     /**

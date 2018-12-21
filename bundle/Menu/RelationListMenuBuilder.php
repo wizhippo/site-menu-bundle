@@ -70,10 +70,7 @@ class RelationListMenuBuilder
         $location = $this->locationService->loadLocation($locationId);
         $content = $location->getContent();
 
-        $menu = $this->factory->createItem($name);
-
-        $menu->setAttribute('location-id', $location->id);
-        $menu->setExtra('ezlocation', $location);
+        $menu = $this->factory->createItem($name, ['ezlocation' => $location]);
 
         if (null !== ($field = $content->getField($relationFieldIdentifier))) {
             foreach ($field->value->destinationContentIds as $contentId) {

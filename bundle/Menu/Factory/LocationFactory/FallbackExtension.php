@@ -25,10 +25,19 @@ class FallbackExtension implements ExtensionInterface
         return true;
     }
 
-    public function buildItem(ItemInterface $item, Location $location): void
+    public function buildOptions(array $options): array
     {
-        $item
-            ->setUri($this->urlGenerator->generate($location))
-            ->setAttribute('id', 'menu-item-location-id-' . $location->id);
+        /** @var \eZ\Publish\API\Repository\Values\Content\Location $location */
+        $location = $options['ezlocation'];
+
+        $options['uri'] = $this->urlGenerator->generate($location);
+        $options['attributes']['id'] = 'menu-item-location-id-' . $location->id;
+
+        return $options;
+    }
+
+    public function buildItem(ItemInterface $item, array $options): void
+    {
+        $item->setUri($options['uri']);
     }
 }
